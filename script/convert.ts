@@ -1,16 +1,21 @@
 import sharp from 'sharp'
 import fs from 'fs'
-
+/**
+ * 
+ * 80,150,ガンマ補正、輪郭強調{進展:赤い文字が読み取れるようになった 改良点:細い文字が読み取れない、付箋の影を読み取ってしまう}
+ */
 async function processImageBuffer(inputBuffer: Buffer, outputPath: string): Promise<void> {
   try {
     const resizeMaxSide = 680 // 画像サイズの最大辺
-    const thresholdColor = 100 // 2値化閾値
-    const thresholdAlpha = 200 // 2値化閾値
+    const thresholdColor = 80 // 2値化閾値 画像の色の2値化を行う際のしきい値です。この値より明るいピクセルは白、暗いピクセルは黒になります。
+    const thresholdAlpha = 150 // 2値化閾値
 
     // 画像を読み込み、アルファチャンネルを確保
     const image = sharp(inputBuffer)
       .grayscale()
+      .gamma(1.5)  // ガンマ補正でコントラストを強調
       .threshold(thresholdColor)
+      .sharpen()  // 文字の輪郭を強調
       .toColorspace('b-w')
       .resize({ width: resizeMaxSide, height: resizeMaxSide, fit: sharp.fit.inside })
       .ensureAlpha()
