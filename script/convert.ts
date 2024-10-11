@@ -3,7 +3,9 @@ import fs from 'fs'
 /**
  * 
  * 80,150,ガンマ補正、輪郭強調{進展:赤い文字が読み取れるようになった 改良点:細い文字が読み取れない、付箋の影を読み取ってしまう}
+ * .median(0)は影を消してくれるが、細い文字も一緒に消える
  */
+
 async function processImageBuffer(inputBuffer: Buffer, outputPath: string): Promise<void> {
   try {
     const resizeMaxSide = 680 // 画像サイズの最大辺
@@ -13,6 +15,8 @@ async function processImageBuffer(inputBuffer: Buffer, outputPath: string): Prom
     // 画像を読み込み、アルファチャンネルを確保
     const image = sharp(inputBuffer)
       .grayscale()
+      .modulate({ brightness: 1.2})  // コントラストを強調
+      //.median(0)  // ノイズリダクション
       .gamma(1.5)  // ガンマ補正でコントラストを強調
       .threshold(thresholdColor)
       .sharpen()  // 文字の輪郭を強調
